@@ -1,4 +1,3 @@
-
 # MIT Scratch Clone
 
 This is a clone of the MIT Scratch project.
@@ -9,16 +8,19 @@ This is a clone of the MIT Scratch project.
 Follow these steps to run the project locally:
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/moresahil7/MIT-SCRATCH-CLONE
    ```
 
 2. Navigate to the project directory:
+
    ```bash
    cd MIT-SCRATCH-CLONE
    ```
 
 3. Install dependencies:
+
    ```bash
    npm install
    ```

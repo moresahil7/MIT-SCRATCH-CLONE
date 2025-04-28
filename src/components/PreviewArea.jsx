@@ -19,6 +19,7 @@ import {
   SET_MULTIPLE_SPRITES,
   UPDATE_MID_AREA_DATA,
   UPDATE_SPRITE_POSITION,
+  SWAP_POSITIONS_OF_STRIPS,
 } from "../context/constants";
 import { v4 as uuidv4 } from "uuid";
 import { MOVE_SPRITE } from "../helpers/sidebarReducer";
@@ -33,8 +34,6 @@ const sprites = {
 export default function PreviewArea() {
   const { state, dispatch } = useAppContext();
   const [showSprites, setShowSprites] = useState(false);
-
-  const [collision, setCollision] = useState([]);
 
   const handleSpriteSelect = useCallback(
     (item) => () => {
@@ -135,32 +134,49 @@ export default function PreviewArea() {
             (sprite1.x - sprite2.x) ** 2 + (sprite1.y - sprite2.y) ** 2
           );
           if (distance < 50) {
-            setCollision([sprite1, sprite2]);
+            // Swap positions of the colliding sprites
+            dispatch({
+              type: SWAP_POSITIONS_OF_STRIPS,
+              payload: {
+                id1: sprite1.id,
+                id2: sprite2.id,
+              },
+            });
+
+            // Move sprites away from each other
+            const angle = Math.atan2(
+              sprite2.y - sprite1.y,
+              sprite2.x - sprite1.x
+            );
+            const moveDistance = 40; // Distance to move sprites apart
+
+            dispatch({
+              type: UPDATE_SPRITE_POSITION,
+              payload: {
+                id: sprite1.id,
+                x: sprite1.x - Math.cos(angle) * moveDistance,
+                y: sprite1.y - Math.sin(angle) * moveDistance,
+              },
+            });
+
+            dispatch({
+              type: UPDATE_SPRITE_POSITION,
+              payload: {
+                id: sprite2.id,
+                x: sprite2.x + Math.cos(angle) * moveDistance,
+                y: sprite2.y + Math.sin(angle) * moveDistance,
+              },
+            });
           }
         }
       }
     }
-  }, [state.multipleSprites]);
+  }, [state.multipleSprites, dispatch]);
 
   useEffect(() => {
-    if (collision.length === 0) {
-      checkCollision();
-    }
-  }, [checkCollision, collision.length]);
-
-  useEffect(() => {
-    if (collision.length == 2 && state?.multipleSprites?.length >= 2) {
-      dispatch({
-        type: "SWAP_POSITIONS_OF_STRIPS",
-        payload: {
-          id1: state?.multipleSprites?.[0]?.id,
-          id2: state?.multipleSprites?.[1]?.id,
-        },
-      });
-      handlePlayButton();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [collision]);
+    const interval = setInterval(checkCollision, 100); // Check for collisions every 100ms
+    return () => clearInterval(interval);
+  }, [checkCollision]);
 
   const handleShowAllSpritesDlg = () => {
     setShowSprites(true);

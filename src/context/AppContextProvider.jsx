@@ -65,24 +65,21 @@ const reducer = (state, action) => {
       const sprite1 = state.multipleSprites.find((sprite) => sprite.id === id1);
       const sprite2 = state.multipleSprites.find((sprite) => sprite.id === id2);
       if (!sprite1 || !sprite2) return state;
+
+
+      const updatedMidAreaData = state.midAreaData.map((item) => {
+        if (item.spriteId === id1) {
+          return { ...item, spriteId: id2 };
+        } else if (item.spriteId === id2) {
+          return { ...item, spriteId: id1 };
+        }
+        return item;
+      });
+
       return {
         ...state,
-        multipleSprites: state.multipleSprites.map((sprite) => {
-          if (sprite.id === id2) {
-            return {
-              ...sprite,
-              name: sprite1.name,
-              id: id1,
-            };
-          } else if (sprite.id === id1) {
-            return {
-              ...sprite,
-              name: sprite2.name,
-              id: id2,
-            };
-          }
-          return sprite;
-        }),
+        midAreaData: updatedMidAreaData,
+        multipleSprites: state.multipleSprites,
       };
     }
     case MOVE_SPRITE:
